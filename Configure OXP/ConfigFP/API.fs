@@ -38,7 +38,7 @@ module private WorkWithPowerShell =
         //let colors = dict["blue", 40; "red", 700]
         ""
 
-    let RunPatch =
+    let RunPatch pPath =
         ""
 
     let private RunPowerShell pScript (pParams:IDictionary)=
@@ -51,6 +51,18 @@ module private WorkWithPowerShell =
           
             Some(PowerShellInstance.Invoke()) 
         )
+
+    let Patch pPathToBacpac =
+        pPathToBacpac
+        |> Array.Parallel.map RunPatch
+
+    let NotNull x = 
+        if x = null
+            then None
+        else Some x
+
+    let PatchDBs pPathToBacpacOption =
+
 
 module API =
         let Init 

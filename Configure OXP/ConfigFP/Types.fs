@@ -11,3 +11,6 @@
           UpdateUI               : string -> string -> string       
           DatabaseFolder         : string}
 
+    type Result<'TSuccess, 'TMessage> = 
+        | Ok of 'TSuccess * 'TMessage list
+        | Bad of 'TMessage list
