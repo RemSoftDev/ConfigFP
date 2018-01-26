@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<Compile Include="Extentions.fs" />
+	<Compile Include="Types.fs" />
+    <Compile Include="API.fs" />
+    <Compile Include="Library.fs" />
+    
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Tutorial.fsx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.PowerShell.5.ReferenceAssemblies" Version="1.1.0" />
+  </ItemGroup>
+
+</Project>
