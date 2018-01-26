@@ -1,7 +1,7 @@
 ﻿namespace ConfigFP
 
-open Types
-open Extentions
+open Types.Types
+open Extentions.Extentions
 
 module private WorkWithFiles =
     open System

@@ -1,4 +1,4 @@
-﻿module ConfigFP.Types
+﻿module ConfigFP.Types.Types
 
     type ConfigState = 
         { PathFolderIIS          : string

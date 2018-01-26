@@ -1,4 +1,4 @@
-﻿module ConfigFP.Extentions
+﻿module ConfigFP.Extentions.Extentions
 
 open System.Runtime.CompilerServices
 
