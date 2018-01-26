@@ -1,4 +1,5 @@
 ﻿using ConfigFP;
+using ConfigFP.Types;
 using Microsoft.FSharp.Core;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ namespace WpfApp1
             TB_DbPassword.Password = ConfigState.DbPassword;
             TB_DbServerName.Text = ConfigState.DbServerName;
 
-            ConfigState = DB.Init(
+            ConfigState = API.Init(
                 ConfigState.DbUser,
                 ConfigState.DbPassword,
                 ConfigState.DbServerName,
@@ -53,7 +54,7 @@ namespace WpfApp1
         {
             var s1 = Stopwatch.StartNew();
             //await CallScript(ConfigState.PathFolderIIS, TB_PatchedDbs);
-            ConfigState = DB.PatchDBIfFilesFound(ConfigState);
+            //ConfigState = DB.PatchDBIfFilesFound(ConfigState);
             
             s1.Stop();
         }
@@ -72,7 +73,7 @@ namespace WpfApp1
 
         private void BTN_ImportDB_Click(object sender, RoutedEventArgs e)
         {
-            ConfigState = DB.Import(ConfigState);
+            //ConfigState = DB.Import(ConfigState);
         }
 
         private string FolderPicker(TextBlock pTextBlock)
