@@ -72,6 +72,7 @@ namespace WpfApp1
 
         private void BTN_ImportDB_Click(object sender, RoutedEventArgs e)
         {
+            API.ImportBacPacs(ConfigState);
             //ConfigState = DB.Import(ConfigState);
         }
 

@@ -9,8 +9,8 @@ module private WorkWithFiles =
 
     let private PathToExecutableProject = Environment.CurrentDirectory |> Path.GetDirectoryName |> Path.GetDirectoryName 
 
-    let GetFileName pFilePath= 
-        Path.GetFileName pFilePath
+    let GetDBName pFilePath= 
+        (Path.GetFileName pFilePath).Split '-' |> Array.head
 
     let private ReadFile pFilePath= 
         Path.Combine(PathToExecutableProject, "PS", pFilePath) |> File.ReadAllText
@@ -19,7 +19,7 @@ module private WorkWithFiles =
         Some(Path.Combine(pPathFolderIIS, pDatabaseFolder) |> Directory.GetFiles |> Array.toList |> List.filter pPredicate)
 
     let PoverShellFile_RemoveMasterKeyLT4GB = ReadFile "RemoveMasterKeyLT4GB.ps1"
-    let private PoverShellFile_ImportDataTierLayer = ReadFile "ImportDataTierLayer.ps1"
+    let PoverShellFile_ImportDataTierLayer = ReadFile "ImportDataTierLayer.ps1"
 
     let private PredicateForPatchedNot (z:string) = (z.Contains(".bacpac") && not (z.Contains("-patched")))
     let private PredicateForPatched (z:string) = (z.Contains(".bacpac") && (z.Contains("-patched")))
@@ -33,33 +33,44 @@ module private WorkWithFiles =
 open WorkWithFiles
 
 module DB =
+    let GetConnectionString 
+            pDbUser 
+            pDbPassword
+            pDbServerName
+            pFileName =
+
+         sprintf "user id=%s;password=%s;Data Source=%s;Database=%s; Integrated Security=false;" 
+            pDbUser 
+            pDbPassword
+            pDbServerName 
+            pFileName
+
     let Init = 
         ""
+
+open DB
 
 module WorkWithPowerShell =
     open System.Management.Automation
     open System.Collections
 
-    //let Init pPathFolderIIS pPathFolderGIT =
-    //    { PathFolderIIS          = pPathFolderIIS
-    //      PathFolderGIT          = pPathFolderIIS}
-          
-
     let private RunPowerShell pScript (pParams:IDictionary)=
         (
-            use PowerShellInstance = 
-                PowerShell.
-                    Create().
-                    AddScript(pScript).
-                    AddParameters(pParams)
+        use PowerShellInstance = 
+            PowerShell.
+                Create().
+                AddScript(pScript).
+                AddParameters(pParams)
 
-            (Some(PowerShellInstance.Invoke()), pParams)
+        (Some(PowerShellInstance.Invoke()), pParams)
         )
 
-    let RunImport pFile=
-        
-
-        ""
+    let RunImport pGetConnectionStringCurry pScript pPathBacpac=
+         let connStr = pGetConnectionStringCurry (GetDBName pPathBacpac)
+         let dict = new System.Collections.Generic.Dictionary<string,string>() 
+         dict.["bacpacPath"] <- pPathBacpac
+         dict.["connectionString"] <- connStr
+         RunPowerShell pScript dict
 
     let RunPatch pScript pPathBacpac =
          let dict = new System.Collections.Generic.Dictionary<string,string>()
@@ -71,10 +82,12 @@ open WorkWithPowerShell
 module Validate = 
     open System.Collections
 
-    let ValidPatch pUpdateUI (z,x:IDictionary) =
+    let Valid pText pUpdateUI (z,x:IDictionary) =
+        let str = pText + " " + x.Item("bacpacPath").ToString();
+
         pUpdateUI (match z with
-                    | Some c -> "Succesfully patched "+ x.Item("bacpacPath").ToString()
-                    | None -> "Error")
+                    | Some c -> "Succesfully " + str
+                    | None -> "Error" + str)
         
 open Validate
 
@@ -98,14 +111,21 @@ module API =
          DatabaseFolder = "Databases"}
 
     let PatchBacPacs pState = 
+        let RunPatchCurry = RunPatch PoverShellFile_RemoveMasterKeyLT4GB
+        let ValidCurry = Valid "Patch" pState.UpdateUI
         GetFilesNamesPatchedNot pState.PathFolderIIS pState.DatabaseFolder 
-            |> Option.map (List.map (RunPatch PoverShellFile_RemoveMasterKeyLT4GB))
-            |> Option.map (List.map (ValidPatch pState.UpdateUI)) 
+            |> Option.map (List.map RunPatchCurry)
+            |> Option.map (List.map ValidCurry) 
             |> ignore
         pState
-
     
     let ImportBacPacs pState = 
-        
-        ""
+        let ConnStrCurry = GetConnectionString pState.DbUser pState.DbPassword pState.DbServerName
+        let RunImportCurry = RunImport ConnStrCurry PoverShellFile_ImportDataTierLayer
+        let ValidCurry = Valid "Patch" pState.UpdateUI
 
+        GetFilesNamesPatched pState.PathFolderIIS pState.DatabaseFolder 
+            |> Option.map (List.map RunImportCurry)
+            |> Option.map (List.map ValidCurry) 
+            |> ignore
+        pState
