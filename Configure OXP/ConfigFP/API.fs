@@ -62,24 +62,24 @@ module private WorkWithPowerShell =
         else Some x
 
     let PatchDBs pPathToBacpacOption =
-
+        ""
 
 module API =
-        let Init 
-            pDbUser 
-            pDbPassword 
-            pDbServerName 
-            pPathFolderIIS 
-            pPathFolderGIT 
-            (pUpdateUI:System.Func<string, string, string>) =
+    let Init 
+        pDbUser 
+        pDbPassword 
+        pDbServerName 
+        pPathFolderIIS 
+        pPathFolderGIT 
+        (pUpdateUI:System.Func<string, string, string>) =
 
-            { PathFolderIIS = pPathFolderIIS
-              PathFolderGIT = pPathFolderGIT
-              DbUser = pDbUser
-              DbPassword = pDbPassword
-              DbServerName = pDbServerName
-              FilesNamesPatched = None
-              FilesNamesPatchedNot = None
-              UpdateUI = pUpdateUI.ToFSharpFunc()
-              DatabaseFolder = "Databases"}
+        {PathFolderIIS = pPathFolderIIS
+         PathFolderGIT = pPathFolderGIT
+         DbUser = pDbUser
+         DbPassword = pDbPassword
+         DbServerName = pDbServerName
+         FilesNamesPatched = None
+         FilesNamesPatchedNot = None
+         UpdateUI = pUpdateUI.ToFSharpFunc()
+         DatabaseFolder = "Databases"}
 
