@@ -29,8 +29,6 @@ namespace WpfApp1
                  "sa",
                  "1qaz!QAZ",
                  "LVAGPLTP2642",
-                 FSharpOption<string[]>.None,
-                 FSharpOption<string[]>.None,
                  null,
                  "Database"
                    );
@@ -53,6 +51,7 @@ namespace WpfApp1
         private async void BTN_PatchDB_Click(object sender, RoutedEventArgs e)
         {
             var s1 = Stopwatch.StartNew();
+            API.PatchBacPacs(ConfigState);
             //await CallScript(ConfigState.PathFolderIIS, TB_PatchedDbs);
             //ConfigState = DB.PatchDBIfFilesFound(ConfigState);
             
@@ -104,7 +103,7 @@ namespace WpfApp1
             return await Task.Run(
                 () =>
                 GetPathBackpacsNotPatched(pPathFolderIIS).
-                Select(UpdateControll(pTextBlock, "start")).
+                Select(UpdateControll(pTextBlock)).
                 AsParallel().
                 Select(Patch(ps)).
                 ToList());
@@ -118,33 +117,21 @@ namespace WpfApp1
                 PowerShellInstance.AddScript(ps);
                 PowerShellInstance.AddParameter("bacpacPath", pPathToDB);
                 Collection<PSObject> PSOutput = PowerShellInstance.Invoke();
-                UpdateControll(TB_PatchedDbs, "done")(pPathToDB);
+                //UpdateControll(TB_PatchedDbs, "done")(pPathToDB);
                 return PSOutput;
             }
         };
 
-        private Func<string, string> UpdateControll(TextBlock pTextBlock, string pref) =>
-            (pPath) =>
+        private Func<string, string> UpdateControll(TextBlock pTextBlock) =>
+            (pText) =>
             {
                 pTextBlock.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
                         new Action(delegate ()
                         {
-                            pTextBlock.Text += Path.GetFileName(pPath) + "_" + pref + " | ";
+                            pTextBlock.Text += pText;
                         }));
 
-                return pPath;
-            };
-
-        private Func<string, string, string> UpdateControll(TextBlock pTextBlock) =>
-            (pref, pPath) =>
-            {
-                pTextBlock.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
-                        new Action(delegate ()
-                        {
-                            pTextBlock.Text += Path.GetFileName(pPath) + "_" + pref + " | ";
-                        }));
-
-                return pPath;
+                return pText;
             };
 
         private string GetPS()

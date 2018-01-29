@@ -12,34 +12,38 @@ module private WorkWithFiles =
     let GetFileName pFilePath= 
         Path.GetFileName pFilePath
 
-    let ReadFile pFilePath= 
+    let private ReadFile pFilePath= 
         Path.Combine(PathToExecutableProject, "PS", pFilePath) |> File.ReadAllText
 
-    let private GetFileNames pConfigState pPredicate = 
-        Path.Combine(pConfigState.PathFolderIIS, pConfigState.DatabaseFolder) |> Directory.GetFiles |> Array.filter pPredicate 
+    let private GetFileNames pPathFolderIIS pDatabaseFolder pPredicate = 
+        Some(Path.Combine(pPathFolderIIS, pDatabaseFolder) |> Directory.GetFiles |> Array.toList |> List.filter pPredicate)
 
-    let private PoverShellFile_RemoveMasterKeyLT4GB = ReadFile "RemoveMasterKeyLT4GB.ps1"
+    let PoverShellFile_RemoveMasterKeyLT4GB = ReadFile "RemoveMasterKeyLT4GB.ps1"
     let private PoverShellFile_ImportDataTierLayer = ReadFile "ImportDataTierLayer.ps1"
 
     let private PredicateForPatchedNot (z:string) = (z.Contains(".bacpac") && not (z.Contains("-patched")))
     let private PredicateForPatched (z:string) = (z.Contains(".bacpac") && (z.Contains("-patched")))
 
-    let private GetFilesNamesPatched pConfigState =
-        {pConfigState with FilesNamesPatched = Some(GetFileNames pConfigState PredicateForPatched)}
+    let GetFilesNamesPatched pPathFolderIIS pDatabaseFolder =
+         GetFileNames pPathFolderIIS pDatabaseFolder PredicateForPatched
     
-    let private GetFilesNamesPatchedNot pConfigState =
-        {pConfigState with FilesNamesPatchedNot = Some(GetFileNames pConfigState PredicateForPatchedNot)}
+    let GetFilesNamesPatchedNot pPathFolderIIS pDatabaseFolder =
+         GetFileNames pPathFolderIIS pDatabaseFolder PredicateForPatchedNot
 
-module private WorkWithPowerShell =
+open WorkWithFiles
+
+module DB =
+    let Init = 
+        ""
+
+module WorkWithPowerShell =
     open System.Management.Automation
     open System.Collections
 
-    let RunImport =
-        //let colors = dict["blue", 40; "red", 700]
-        ""
-
-    let RunPatch pPath =
-        ""
+    //let Init pPathFolderIIS pPathFolderGIT =
+    //    { PathFolderIIS          = pPathFolderIIS
+    //      PathFolderGIT          = pPathFolderIIS}
+          
 
     let private RunPowerShell pScript (pParams:IDictionary)=
         (
@@ -48,38 +52,58 @@ module private WorkWithPowerShell =
                     Create().
                     AddScript(pScript).
                     AddParameters(pParams)
-          
-            Some(PowerShellInstance.Invoke()) 
+
+            (Some(PowerShellInstance.Invoke()), pParams)
         )
 
-    let Patch pPathToBacpac =
-        pPathToBacpac
-        |> Array.Parallel.map RunPatch
+    let RunImport pFile=
+        
 
-    let NotNull x = 
-        if x = null
-            then None
-        else Some x
-
-    let PatchDBs pPathToBacpacOption =
         ""
+
+    let RunPatch pScript pPathBacpac =
+         let dict = new System.Collections.Generic.Dictionary<string,string>()
+         dict.["bacpacPath"] <- pPathBacpac
+         RunPowerShell pScript dict
+
+open WorkWithPowerShell
+
+module Validate = 
+    open System.Collections
+
+    let ValidPatch pUpdateUI (z,x:IDictionary) =
+        pUpdateUI (match z with
+                    | Some c -> "Succesfully patched "+ x.Item("bacpacPath").ToString()
+                    | None -> "Error")
+        
+open Validate
 
 module API =
     let Init 
-        pDbUser 
-        pDbPassword 
-        pDbServerName 
-        pPathFolderIIS 
-        pPathFolderGIT 
-        (pUpdateUI:System.Func<string, string, string>) =
+            pDbUser 
+            pDbPassword 
+            pDbServerName 
+            pPathFolderIIS 
+            pPathFolderGIT 
+            (pUpdateUI:System.Func<string, string>) =
 
         {PathFolderIIS = pPathFolderIIS
          PathFolderGIT = pPathFolderGIT
          DbUser = pDbUser
          DbPassword = pDbPassword
          DbServerName = pDbServerName
-         FilesNamesPatched = None
-         FilesNamesPatchedNot = None
          UpdateUI = pUpdateUI.ToFSharpFunc()
          DatabaseFolder = "Databases"}
+
+    let PatchBacPacs pState = 
+        GetFilesNamesPatchedNot pState.PathFolderIIS pState.DatabaseFolder 
+            |> Option.map (List.map (RunPatch PoverShellFile_RemoveMasterKeyLT4GB))
+            |> Option.map (List.map (ValidPatch pState.UpdateUI)) 
+            |> ignore
+        pState
+
+    
+    let ImportBacPacs pState = 
+        
+        ""
 
