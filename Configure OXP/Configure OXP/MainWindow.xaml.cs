@@ -128,7 +128,7 @@ namespace WpfApp1
                 pTextBlock.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
                         new Action(delegate ()
                         {
-                            pTextBlock.Text += pText;
+                            pTextBlock.Text += pText + Environment.NewLine;
                         }));
 
                 return pText;

@@ -79,6 +79,8 @@ module Validate =
 open Validate
 
 module API =
+    open Microsoft.FSharp
+
     let Init 
             pDbUser 
             pDbPassword 
