@@ -15,21 +15,24 @@ module private WorkWithFiles =
     let private ReadFile pFilePath= 
         Path.Combine(PathToExecutableProject, "PS", pFilePath) |> File.ReadAllText
 
-    let private GetFileNames pPathFolderIIS pDatabaseFolder pPredicate = 
-        Some(Path.Combine(pPathFolderIIS, pDatabaseFolder) |> Directory.GetFiles |> Array.toList |> List.filter pPredicate)
+    let GetFiles pPathFolderIIS pDatabaseFolder pPredicate = 
+        let files = Path.Combine(pPathFolderIIS, pDatabaseFolder)
+                      |> Directory.GetFiles 
+                      |> Array.toList 
+                      |> List.filter pPredicate
 
-    let PoverShellFile_RemoveMasterKeyLT4GB = ReadFile "RemoveMasterKeyLT4GB.ps1"
-    let PoverShellFile_ImportDataTierLayer = ReadFile "ImportDataTierLayer.ps1"
+        match files.Length > 0 with
+        | true -> Some files
+        | false -> None
 
-    let private PredicateForPatchedNot (z:string) = (z.Contains(".bacpac") && not (z.Contains("-patched")))
-    let private PredicateForPatched (z:string) = (z.Contains(".bacpac") && (z.Contains("-patched")))
+    let  PredicateForPatchedNot (z:string) = (z.Contains(".bacpac") && not (z.Contains("-patched")))
+    let  PredicateForPatched (z:string) = (z.Contains(".bacpac") && (z.Contains("-patched")))
 
-    let GetFilesNamesPatched pPathFolderIIS pDatabaseFolder =
-         GetFileNames pPathFolderIIS pDatabaseFolder PredicateForPatched
+    let ProcessScript f pScriptName = f (ReadFile pScriptName)
+
+    let ApplyScriptToEveryFile pBacpacList f =        
+        pBacpacList |> Option.map (List.map f)
     
-    let GetFilesNamesPatchedNot pPathFolderIIS pDatabaseFolder =
-         GetFileNames pPathFolderIIS pDatabaseFolder PredicateForPatchedNot
-
 open WorkWithFiles
 
 module DB =
@@ -66,15 +69,14 @@ module WorkWithPowerShell =
         )
 
     let RunImport pGetConnectionStringCurry pScript pPathBacpac=
-         let connStr = pGetConnectionStringCurry (GetDBName pPathBacpac)
          let dict = new System.Collections.Generic.Dictionary<string,string>() 
          dict.["bacpacPath"] <- pPathBacpac
-         dict.["connectionString"] <- connStr
+         dict.["connectionString"] <- pGetConnectionStringCurry (GetDBName pPathBacpac)
          RunPowerShell pScript dict
 
-    let RunPatch pScript pPathBacpac =
+    let RunPatch pScript pBacpac =
          let dict = new System.Collections.Generic.Dictionary<string,string>()
-         dict.["bacpacPath"] <- pPathBacpac
+         dict.["bacpacPath"] <- pBacpac
          RunPowerShell pScript dict
 
 open WorkWithPowerShell
@@ -92,8 +94,6 @@ module Validate =
 open Validate
 
 module API =
-    open Microsoft.FSharp
-
     let Init 
             pDbUser 
             pDbPassword 
@@ -101,7 +101,7 @@ module API =
             pPathFolderIIS 
             pPathFolderGIT 
             (pUpdateUI:System.Func<string, string>) =
-
+        
         {PathFolderIIS = pPathFolderIIS
          PathFolderGIT = pPathFolderGIT
          DbUser = pDbUser
@@ -111,21 +111,20 @@ module API =
          DatabaseFolder = "Databases"}
 
     let PatchBacPacs pState = 
-        let RunPatchCurry = RunPatch PoverShellFile_RemoveMasterKeyLT4GB
-        let ValidCurry = Valid "Patch" pState.UpdateUI
-        GetFilesNamesPatchedNot pState.PathFolderIIS pState.DatabaseFolder 
-            |> Option.map (List.map RunPatchCurry)
-            |> Option.map (List.map ValidCurry) 
-            |> ignore
+        
+        let pBacpacList =  GetFiles pState.PathFolderIIS pState.DatabaseFolder PredicateForPatchedNot
+        let pScriptForApply = "RemoveMasterKeyLT4GB.ps1" |> ProcessScript RunPatch
+        ApplyScriptToEveryFile pBacpacList pScriptForApply
+        |> ignore
         pState
     
     let ImportBacPacs pState = 
         let ConnStrCurry = GetConnectionString pState.DbUser pState.DbPassword pState.DbServerName
-        let RunImportCurry = RunImport ConnStrCurry PoverShellFile_ImportDataTierLayer
-        let ValidCurry = Valid "Patch" pState.UpdateUI
-
-        GetFilesNamesPatched pState.PathFolderIIS pState.DatabaseFolder 
-            |> Option.map (List.map RunImportCurry)
-            |> Option.map (List.map ValidCurry) 
-            |> ignore
+        let pBacpacList =  GetFiles pState.PathFolderIIS pState.DatabaseFolder PredicateForPatched
+        let pScriptForApply = "ImportDataTierLayer.ps1" |> ProcessScript (RunImport ConnStrCurry)
+        ApplyScriptToEveryFile pBacpacList pScriptForApply
+        |> ignore
         pState
+
+
+        
