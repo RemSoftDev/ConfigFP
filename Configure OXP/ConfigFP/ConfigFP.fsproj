@@ -5,10 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<Compile Include="Extentions.fs" />
-	<Compile Include="Types.fs" />
+	  <Compile Include="Extentions.fs" />
+	  <Compile Include="Types.fs" />
+    <Compile Include="WorkWithConfigFile.fs" />
+    <Compile Include="WorkWithDB.fs" />
+    <Compile Include="WorkWithFiles.fs" />
+    <Compile Include="WorkWithPowerShell.fs" />
     <Compile Include="API.fs" />
-    <Compile Include="Library.fs" />
     
   </ItemGroup>
 
@@ -18,6 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.PowerShell.5.ReferenceAssemblies" Version="1.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 
 </Project>

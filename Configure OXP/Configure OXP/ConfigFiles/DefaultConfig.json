@@ -1,0 +1,14 @@
+﻿{
+  "Paths": [
+    {
+      "IIS": "C:\\inetpub\\wwwroot\\volvo",
+      "GIT": "C:\\Users\\oleksandr.dubyna\\Documents\\GIT\\integration\\Volvo.Web"
+    }
+  ],
+  "DB": {
+    "DbUser": "sa",
+    "DbPassword": "1qaz!QAZ",
+    "DbServerName": "LVAGPLTP2642",
+    "DbDatabaseFolder": "Database"
+  }
+}

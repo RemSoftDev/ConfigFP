@@ -42,13 +42,37 @@
 open System
 
 
+
 /// A module is a grouping of F# code, such as values, types, and function values. 
 /// Grouping code in modules helps keep related code together and helps avoid name conflicts in your program.
 ///
 /// To learn more, see: https://docs.microsoft.com/en-us/dotnet/articles/fsharp/language-reference/modules
 module IntegersAndNumbers = 
+    type Monoid<'T> = { identity : 'T; reducer : ('T -> 'T -> 'T); } 
+    let retM identity reducer = { identity = identity; reducer = reducer; }
+    let reduce elements monoid = 
+        (elements @ [monoid.identity; monoid.identity;]) 
+        |> List.reduce monoid.reducer
 
-    /// This is a sample integer.
+    type Example = 
+    | Add of (int * int)
+    | SideEffect of (int * (int -> int))
+    | Wire of (Example * (int -> Example))
+
+    let rec execute e = 
+        match e with
+        | Add (l, r) -> l + r
+        | SideEffect (arg, f) -> arg |> f
+        | Wire (e, f) -> e |> execute |> f |> execute 
+
+    let (<.>) e f = Wire(e, f)
+
+    let makeSideEffect f x = 
+        SideEffect(x, (fun x' -> 
+            f x'
+            x'))
+        
+    Add(1, 1) <.> (makeSideEffect (printf "%i")) |> execute    /// This is a sample integer.
     let sampleInteger = 176
 
     /// This is a sample floating point number.

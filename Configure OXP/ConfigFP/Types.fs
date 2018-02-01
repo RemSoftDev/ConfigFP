@@ -11,6 +11,17 @@
           FilesNamesPatched      : string[] option
           FilesNamesPatchedNot   : string[] option }
 
+    type ConfigJsonPathsState =
+        { IIS : string
+          GIT : string}
+
+    type ConfigJsonState = 
+        { Path                   : ConfigJsonPathsState list
+          DbUser                 : string
+          DbPassword             : string
+          DbServerName           : string
+          DatabaseFolder         : string}
+
     type ConfigState = 
         { PathFolderIIS          : string
           PathFolderGIT          : string

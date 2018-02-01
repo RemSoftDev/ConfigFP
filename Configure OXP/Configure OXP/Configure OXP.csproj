@@ -63,6 +63,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <None Include="ConfigFiles\DefaultConfig.json" />
     <None Include="PS\ImportDataTierLayer.ps1" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
