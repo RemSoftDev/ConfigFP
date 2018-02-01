@@ -7,7 +7,6 @@ module CustomInfixOperators =
     let (||>>) opt f = opt |> Option.map f 
     let (|||) f g = (fun opt -> (opt ||>> f) ||>> g)
 
-
 module Validate = 
     open System.Collections
 
