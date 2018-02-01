@@ -22,7 +22,6 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
-
             ConfigState = new Types.ConfigState(
                  @"C:\\inetpub\\wwwroot\\volvo",
                  @"C:\Users\oleksandr.dubyna\Documents\GIT\integration\Volvo.Web",
