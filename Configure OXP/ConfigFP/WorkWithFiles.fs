@@ -3,12 +3,10 @@
     open System.IO
 
     let private PathToExecutableProject = Environment.CurrentDirectory |> Path.GetDirectoryName |> Path.GetDirectoryName 
+    let PathToPowerShellScripts pPath = Path.Combine(PathToExecutableProject |> Path.GetDirectoryName |> Path.GetDirectoryName |> Path.GetDirectoryName, pPath)
+    let GetDBName pPath = (Path.GetFileName pPath).Split '-' |> Array.head
 
-    let GetDBName pPath= 
-        (Path.GetFileName pPath).Split '-' |> Array.head
-
-    let private ReadFile pFilePath= 
-        Path.Combine(PathToExecutableProject, "PS", pFilePath) |> File.ReadAllText
+    let private ReadFile pFilePath = Path.Combine(PathToExecutableProject, "PS", pFilePath) |> File.ReadAllText 
 
     let GetFiles pPathFolderIIS pDatabaseFolder pPredicate = 
         let files = Path.Combine(pPathFolderIIS, pDatabaseFolder)
@@ -23,4 +21,4 @@
     let  PredicateForPatchedNot (z:string) = (z.Contains(".bacpac") && not (z.Contains("-patched")))
     let  PredicateForPatched (z:string) = (z.Contains(".bacpac") && (z.Contains("-patched")))
 
-    let ProcessScript f pScriptName = f (ReadFile pScriptName)
+    let ProcessFileContent f pFileName = f (ReadFile pFileName)

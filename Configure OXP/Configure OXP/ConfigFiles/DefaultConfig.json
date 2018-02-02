@@ -1,10 +1,9 @@
 ﻿{
-  "Paths": [
-    {
-      "IIS": "C:\\inetpub\\wwwroot\\volvo",
-      "GIT": "C:\\Users\\oleksandr.dubyna\\Documents\\GIT\\integration\\Volvo.Web"
-    }
-  ],
+  "Paths": {
+    "IIS": "C:\\inetpub\\wwwroot\\volvo",
+    "GIT": "C:\\Users\\oleksandr.dubyna\\Documents\\GIT\\integration\\Volvo.Web",
+    "ConfigPowerShell": "volvo82_sitecore_clean"
+  },
   "DB": {
     "DbUser": "sa",
     "DbPassword": "1qaz!QAZ",

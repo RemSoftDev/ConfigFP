@@ -7,9 +7,9 @@
   <ItemGroup>
 	  <Compile Include="Extentions.fs" />
 	  <Compile Include="Types.fs" />
+    <Compile Include="WorkWithFiles.fs" />
     <Compile Include="WorkWithConfigFile.fs" />
     <Compile Include="WorkWithDB.fs" />
-    <Compile Include="WorkWithFiles.fs" />
     <Compile Include="WorkWithPowerShell.fs" />
     <Compile Include="API.fs" />
     

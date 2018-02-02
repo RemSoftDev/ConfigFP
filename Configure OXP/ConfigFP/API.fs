@@ -32,7 +32,8 @@ module API =
             pPathFolderIIS 
             pPathFolderGIT 
             (pUpdateUI:System.Func<string, string>) =
-        
+        let zxc = PathToPowerShellScripts;
+        let bg = ""
         {PathFolderIIS = pPathFolderIIS
          PathFolderGIT = pPathFolderGIT
          DbUser = pDbUser
@@ -43,7 +44,7 @@ module API =
 
     let PatchBacPacs pState = 
         let pBacpacList =  GetFiles pState.PathFolderIIS pState.DatabaseFolder PredicateForPatchedNot
-        let pScriptForApply = "RemoveMasterKeyLT4GB.ps1" |> ProcessScript RunPatch
+        let pScriptForApply = "RemoveMasterKeyLT4GB.ps1" |> ProcessFileContent RunPatch
         let ValidCurry = Valid "Patch" pState.UpdateUI
         let res = pBacpacList
                  ||>> List.map pScriptForApply
@@ -55,7 +56,7 @@ module API =
     let ImportBacPacs pState = 
         let ConnStrCurry = GetConnectionString pState.DbUser pState.DbPassword pState.DbServerName
         let pBacpacList =  GetFiles pState.PathFolderIIS pState.DatabaseFolder PredicateForPatched
-        let pScriptForApply = "ImportDataTierLayer.ps1" |> ProcessScript (RunImport GetDBName ConnStrCurry)
+        let pScriptForApply = "ImportDataTierLayer.ps1" |> ProcessFileContent (RunImport GetDBName ConnStrCurry)
         let ValidCurry = Valid "Import" pState.UpdateUI
         let res = pBacpacList 
                  ||>> List.map pScriptForApply

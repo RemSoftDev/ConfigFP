@@ -1,26 +1,21 @@
 ﻿module ConfigFP.Types.Types
- 
-    type FilesState = 
-        { PathFolderIIS          : string
-          PathFolderGIT          : string
-          DatabaseFolder         : string}
- 
-    type PSState = 
-        { PathFolderIIS          : string
-          PathFolderGIT          : string
-          FilesNamesPatched      : string[] option
-          FilesNamesPatchedNot   : string[] option }
+
+open System.Net
 
     type ConfigJsonPathsState =
         { IIS : string
-          GIT : string}
+          GIT : string
+          ConfigPowerShell : string}
+
+    type ConfigJsonDBState =
+        { DbUser           : string
+          DbPassword       : string
+          DbServerName     : string
+          DbDatabaseFolder : string}
 
     type ConfigJsonState = 
-        { Path                   : ConfigJsonPathsState list
-          DbUser                 : string
-          DbPassword             : string
-          DbServerName           : string
-          DatabaseFolder         : string}
+        { Path : ConfigJsonPathsState
+          DB   : ConfigJsonDBState}
 
     type ConfigState = 
         { PathFolderIIS          : string
